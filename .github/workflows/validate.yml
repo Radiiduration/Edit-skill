@@ -1,0 +1,25 @@
+name: validate-skills
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate skill structure
+        run: |
+          set -e
+          for dir in */; do
+            d="${dir%/}"
+            [ -f "$d/SKILL.md" ] || continue
+            echo "Checking $d"
+            name=$(sed -n 's/^name: *//p' "$d/SKILL.md" | head -1)
+            desc=$(sed -n 's/^description: *//p' "$d/SKILL.md" | head -1)
+            [ "$name" = "$d" ] || { echo "name '$name' does not match folder '$d'"; exit 1; }
+            [ ${#desc} -le 200 ] || { echo "description is ${#desc} chars (max 200 for claude.ai)"; exit 1; }
+            [ "$(wc -l < "$d/SKILL.md")" -lt 500 ] || { echo "SKILL.md must be under 500 lines"; exit 1; }
+          done
+      - name: Lint shell scripts
+        run: shellcheck --severity=warning */scripts/*.sh
