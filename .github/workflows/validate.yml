@@ -22,4 +22,17 @@ jobs:
             [ "$(wc -l < "$d/SKILL.md")" -lt 500 ] || { echo "SKILL.md must be under 500 lines"; exit 1; }
           done
       - name: Lint shell scripts
-        run: shellcheck --severity=warning */scripts/*.sh
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y shellcheck
+          shellcheck --severity=warning */scripts/*.sh tests/*.sh
+      - name: Python syntax
+        run: python3 -m py_compile */scripts/*.py
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ffmpeg and numpy
+        run: |
+          sudo apt-get update -y && sudo apt-get install -y ffmpeg python3-numpy
+      - name: Smoke test scripts
+        run: bash tests/smoke.sh

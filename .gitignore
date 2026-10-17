@@ -2,3 +2,8 @@
 *.mp4
 *.mov
 .studio/
+__pycache__/
+*.pyc
+node_modules/
+out/
+renders/
